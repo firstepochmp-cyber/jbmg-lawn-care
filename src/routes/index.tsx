@@ -329,7 +329,7 @@ function Home() {
                 </div>
                 <div>
                   <div className="text-sm font-semibold">{r.name}</div>
-                  <div className="text-xs text-muted-foreground">Verified Google Review</div>
+                  <div className="text-xs text-muted-foreground">{r.meta} · Google</div>
                 </div>
               </figcaption>
             </figure>

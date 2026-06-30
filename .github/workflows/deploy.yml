@@ -21,6 +21,12 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Set worker name
+        run: |
+          DATE=$(date -u +%Y-%m-%d)
+          sed -i "s/\"compatibility_date\": \".*\"/\"compatibility_date\": \"$DATE\"/" .output/server/wrangler.json
+          sed -i 's/"name": ".*"/"name": "jbmg-lawn-care"/' .output/server/wrangler.json
+
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
         with:

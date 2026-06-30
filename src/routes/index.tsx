@@ -15,12 +15,39 @@ import {
   Menu,
   X,
 } from "lucide-react";
+import logoAsset from "@/assets/jbmg-logo.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "JBMG Lawn Care | Orem's Most Trusted Lawn Care Service" },
       { name: "description", content: "Professional lawn care in Orem, UT. Mowing, fertilization, aeration & weed control. 5.0★ rated. Call (801) 380-0475." },
+      { property: "og:title", content: "JBMG Lawn Care | Orem's Most Trusted Lawn Care" },
+      { property: "og:description", content: "Eco-friendly residential & commercial lawn care in Orem, UT. 5.0★ Google rated." },
+      { property: "og:url", content: "/" },
+    ],
+    links: [{ rel: "canonical", href: "/" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          name: "JBMG Lawn Care",
+          image: logoAsset.url,
+          telephone: "+1-801-380-0475",
+          address: {
+            "@type": "PostalAddress",
+            streetAddress: "78 W 400 S",
+            addressLocality: "Orem",
+            addressRegion: "UT",
+            postalCode: "84058",
+            addressCountry: "US",
+          },
+          aggregateRating: { "@type": "AggregateRating", ratingValue: "5.0", reviewCount: "11" },
+          openingHours: "Mo-Sa 08:00-21:00",
+        }),
+      },
     ],
   }),
   component: Home,
@@ -29,21 +56,20 @@ export const Route = createFileRoute("/")({
 const BRAND = "#3DB33F";
 const INK = "#1A1A1A";
 
-function Logo({ className = "" }: { className?: string }) {
+function Logo({ size = 44 }: { size?: number }) {
   return (
-    <div className={`inline-flex items-center gap-2 ${className}`}>
-      <div className="flex h-10 w-10 items-center justify-center rounded-lg" style={{ backgroundColor: INK }}>
-        <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke={BRAND} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M3 17h13a3 3 0 0 0 3-3V9h2" />
-          <circle cx="6" cy="19" r="2" />
-          <circle cx="16" cy="19" r="2" />
-          <path d="M5 13l2-5h7l2 5" />
-          <path d="M9 5l1-2M13 5l1-2" />
-        </svg>
-      </div>
+    <div className="inline-flex items-center gap-3">
+      <img
+        src={logoAsset.url}
+        alt="JBMG Lawn Care logo"
+        width={size}
+        height={size}
+        className="rounded-full object-cover"
+        style={{ width: size, height: size }}
+      />
       <div className="leading-tight">
-        <div className="text-base font-extrabold tracking-tight" style={{ color: INK }}>JBMG</div>
-        <div className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: BRAND }}>Lawn Care</div>
+        <div className="text-base font-extrabold tracking-tight" style={{ color: INK }}>JBMG Lawn Care</div>
+        <div className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: BRAND }}>Orem, Utah</div>
       </div>
     </div>
   );
@@ -59,19 +85,23 @@ const services = [
 const reviews = [
   {
     name: "Nick Pitts",
-    text: "JBMG has been amazing to work with. They show up on time, do quality work, and the lawn has never looked better. Highly recommend to anyone in Orem looking for a reliable lawn service.",
+    meta: "7 reviews · 1 photo",
+    text: "My yard was a mess and I had no idea where to start. I don't usually go looking for lawn care services, but JBMG was recommended to me — and they did an amazing job. The yard looks completely transformed.",
   },
   {
     name: "David Sorenson",
-    text: "Great communication and even better results. My yard looks cleaner and healthier after just a few visits. Fair pricing and they really take pride in what they do.",
+    meta: "1 review",
+    text: "I've been using JBMG for over a month now. They are very detailed and always respond quickly to texts and questions. My wife is particular about how the edging gets done, and these guys do it right. Their work is on point.",
   },
   {
     name: "Shane Parsons",
-    text: "Professional, friendly, and thorough. JBMG treats my property like it's their own. I've recommended them to several neighbors and everyone has been happy.",
+    meta: "6 reviews",
+    text: "I was out of town for a few weeks and the yard got out of control. I was just planning a one-time clean-up since I'm kind of cheap, but they did such a great job and were affordable enough that I kept them on a schedule. Would recommend to anyone.",
   },
 ];
 
 const areas = ["Orem", "Provo", "Lindon", "Vineyard", "Pleasant Grove", "American Fork", "Lehi", "Springville"];
+
 
 function Home() {
   const [open, setOpen] = useState(false);

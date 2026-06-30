@@ -199,23 +199,13 @@ function Home() {
           </div>
 
           <div className="relative">
-            <div className="relative rounded-3xl border border-border bg-white p-2 shadow-lift">
-              <div className="aspect-[4/5] overflow-hidden rounded-2xl" style={{ background: `linear-gradient(160deg, ${INK} 0%, #2a2a2a 100%)` }}>
-                <div className="flex h-full flex-col items-center justify-center p-10 text-center">
-                  <svg viewBox="0 0 24 24" className="h-32 w-32" fill="none" stroke={BRAND} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M3 17h13a3 3 0 0 0 3-3V9h2" />
-                    <circle cx="6" cy="19" r="2" />
-                    <circle cx="16" cy="19" r="2" />
-                    <path d="M5 13l2-5h7l2 5" />
-                    <path d="M9 5l1-2M13 5l1-2" />
-                  </svg>
-                  <div className="mt-6 text-4xl font-extrabold tracking-tight text-white">JBMG</div>
-                  <div className="mt-1 text-sm font-semibold uppercase tracking-[0.3em]" style={{ color: BRAND }}>
-                    Lawn Care
-                  </div>
-                  <div className="mt-8 h-px w-16" style={{ backgroundColor: BRAND }} />
-                  <p className="mt-6 max-w-xs text-sm text-white/70">Serving Orem and Utah County with sharp, sustainable lawn care.</p>
-                </div>
+            <div className="relative rounded-3xl border border-border bg-white p-3 shadow-lift">
+              <div className="aspect-square overflow-hidden rounded-2xl flex items-center justify-center" style={{ background: `radial-gradient(circle at 30% 30%, #1f1f1f 0%, ${INK} 70%)` }}>
+                <img
+                  src={logoAsset.url}
+                  alt="JBMG Lawn Care"
+                  className="h-[78%] w-[78%] object-contain"
+                />
               </div>
             </div>
             <div className="absolute -bottom-4 -left-4 hidden rounded-2xl border border-border bg-white p-4 shadow-card md:block">
@@ -229,7 +219,19 @@ function Home() {
                 </div>
               </div>
             </div>
+            <div className="absolute -top-4 -right-4 hidden rounded-2xl border border-border bg-white p-4 shadow-card md:block">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ backgroundColor: `${BRAND}1a` }}>
+                  <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                </div>
+                <div>
+                  <div className="text-xs font-semibold">5.0 on Google</div>
+                  <div className="text-xs text-muted-foreground">11 verified reviews</div>
+                </div>
+              </div>
+            </div>
           </div>
+
         </div>
       </section>
 

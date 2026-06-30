@@ -15,7 +15,7 @@ import {
   Menu,
   X,
 } from "lucide-react";
-import logoAsset from "@/assets/jbmg-logo.png.asset.json";
+const logoAsset = { url: "/jbmg-logo.png" };
 
 export const Route = createFileRoute("/")({
   head: () => ({

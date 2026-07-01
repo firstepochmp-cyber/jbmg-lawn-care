@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useRef, useEffect, type MouseEvent } from "react";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import {
   Scissors,
   Sprout,
@@ -14,6 +15,7 @@ import {
   ArrowRight,
   Menu,
   X,
+  Sparkles,
 } from "lucide-react";
 const logoAsset = { url: "/jbmg-logo.png" };
 
@@ -56,6 +58,16 @@ export const Route = createFileRoute("/")({
 const BRAND = "#3DB33F";
 const INK = "#1A1A1A";
 
+const fadeUp = {
+  hidden: { opacity: 0, y: 24 },
+  show: { opacity: 1, y: 0 },
+};
+
+const stagger = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.1 } },
+};
+
 function Logo({ size = 44 }: { size?: number }) {
   return (
     <div className="inline-flex items-center gap-3">
@@ -71,6 +83,41 @@ function Logo({ size = 44 }: { size?: number }) {
         <div className="text-base font-extrabold tracking-tight" style={{ color: INK }}>JBMG Lawn Care</div>
         <div className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: BRAND }}>Orem, Utah</div>
       </div>
+    </div>
+  );
+}
+
+function GrassModel({ size = 110 }: { size?: number }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return <div style={{ width: size, height: size }} />;
+  return (
+    <model-viewer
+      src="/models/grass-tuft.glb"
+      alt="3D grass model"
+      auto-rotate
+      camera-controls={false}
+      disable-zoom
+      shadow-intensity="0"
+      exposure="1.1"
+      loading="eager"
+      style={{ width: size, height: size, background: "transparent" }}
+    />
+  );
+}
+
+function SpotlightCard({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const handleMove = (e: MouseEvent<HTMLDivElement>) => {
+    const el = ref.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    el.style.setProperty("--spot-x", `${e.clientX - rect.left}px`);
+    el.style.setProperty("--spot-y", `${e.clientY - rect.top}px`);
+  };
+  return (
+    <div ref={ref} onMouseMove={handleMove} className={`spotlight-card ${className}`}>
+      <div className="relative z-10">{children}</div>
     </div>
   );
 }
@@ -91,24 +138,26 @@ const reviews = [
   {
     name: "David Sorenson",
     meta: "1 review",
-    text: "I've been using JBMG for over a month now. They are very detailed and always respond quickly to texts and questions. My wife is particular about how the edging gets done, and these guys do it right. Their work is on point.",
+    text: "I've been using JBMG for over a month now. They are very detailed and always respond quickly to texts and questions. My wife is particular about how the edging gets done, and these guys do it right.",
   },
   {
     name: "Shane Parsons",
     meta: "6 reviews",
-    text: "I was out of town for a few weeks and the yard got out of control. I was just planning a one-time clean-up since I'm kind of cheap, but they did such a great job and were affordable enough that I kept them on a schedule. Would recommend to anyone.",
+    text: "I was out of town for a few weeks and the yard got out of control. I was just planning a one-time clean-up, but they did such a great job and were affordable enough that I kept them on a schedule.",
   },
 ];
 
 const areas = ["Orem", "Provo", "Lindon", "Vineyard", "Pleasant Grove", "American Fork", "Lehi", "Springville"];
 
-
 function Home() {
   const [open, setOpen] = useState(false);
   const [sent, setSent] = useState(false);
+  const aboutRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: aboutRef, offset: ["start end", "end start"] });
+  const parallaxY = useTransform(scrollYProgress, [0, 1], ["-8%", "8%"]);
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
       {/* NAV */}
       <header className="sticky top-0 z-50 border-b border-border bg-white/80 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
@@ -158,22 +207,22 @@ function Home() {
           }}
         />
         <div className="mx-auto grid max-w-7xl items-center gap-12 px-6 py-20 lg:grid-cols-2 lg:py-28">
-          <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-border bg-white px-3 py-1.5 text-xs font-semibold">
+          <motion.div initial="hidden" animate="show" variants={stagger}>
+            <motion.div variants={fadeUp} className="inline-flex items-center gap-2 rounded-full border border-border bg-white px-3 py-1.5 text-xs font-semibold">
               <span className="flex h-2 w-2 rounded-full" style={{ backgroundColor: BRAND }} />
               Locally owned · Orem, UT
-            </div>
-            <h1 className="mt-5 text-5xl font-extrabold leading-[1.05] tracking-tight md:text-6xl lg:text-7xl">
+            </motion.div>
+            <motion.h1 variants={fadeUp} className="mt-5 text-5xl font-extrabold leading-[1.05] tracking-tight md:text-6xl lg:text-7xl">
               Orem's Most Trusted <span style={{ color: BRAND }}>Lawn Care</span>.
-            </h1>
-            <p className="mt-6 max-w-xl text-lg text-muted-foreground">
+            </motion.h1>
+            <motion.p variants={fadeUp} className="mt-6 max-w-xl text-lg text-muted-foreground">
               Reliable mowing, fertilization, and seasonal care for residential and commercial properties.
               Eco-friendly practices, sharp results, and people who actually show up.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
+            </motion.p>
+            <motion.div variants={fadeUp} className="mt-8 flex flex-wrap gap-3">
               <a
                 href="#contact"
-                className="inline-flex items-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-green-500/20 transition hover:opacity-90"
+                className="inline-flex items-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-green-500/20 transition hover:opacity-90 hover:scale-[1.03]"
                 style={{ backgroundColor: BRAND }}
               >
                 Get a Free Quote <ArrowRight className="h-4 w-4" />
@@ -185,8 +234,8 @@ function Home() {
               >
                 <Phone className="h-4 w-4" /> Call Us Now
               </a>
-            </div>
-            <div className="mt-8 flex items-center gap-4">
+            </motion.div>
+            <motion.div variants={fadeUp} className="mt-8 flex items-center gap-4">
               <div className="flex">
                 {[...Array(5)].map((_, i) => (
                   <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
@@ -195,31 +244,42 @@ function Home() {
               <p className="text-sm text-muted-foreground">
                 <span className="font-semibold text-foreground">5.0</span> · 11 Google reviews
               </p>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
 
           <div className="relative">
-            <div className="relative rounded-3xl border border-border bg-white p-3 shadow-lift">
-              <div className="aspect-square overflow-hidden rounded-2xl flex items-center justify-center" style={{ background: `radial-gradient(circle at 30% 30%, #1f1f1f 0%, ${INK} 70%)` }}>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.94, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 0.7, ease: "easeOut" }}
+              className="relative overflow-hidden rounded-3xl border border-border bg-white p-3 shadow-lift"
+            >
+              <div className="aspect-square overflow-hidden rounded-2xl">
                 <img
-                  src={logoAsset.url}
-                  alt="JBMG Lawn Care"
-                  className="h-[78%] w-[78%] object-contain"
+                  src="/images/hero-mowing.jpg"
+                  alt="JBMG Lawn Care technician mowing a lush green lawn"
+                  className="h-full w-full object-cover"
                 />
               </div>
-            </div>
-            <div className="absolute -bottom-4 -left-4 hidden rounded-2xl border border-border bg-white p-4 shadow-card md:block">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ backgroundColor: `${BRAND}1a` }}>
-                  <CheckCircle2 className="h-5 w-5" style={{ color: BRAND }} />
-                </div>
-                <div>
-                  <div className="text-xs font-semibold">Free Estimates</div>
-                  <div className="text-xs text-muted-foreground">No-pressure quotes</div>
-                </div>
-              </div>
-            </div>
-            <div className="absolute -top-4 -right-4 hidden rounded-2xl border border-border bg-white p-4 shadow-card md:block">
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              whileHover={{ y: -4 }}
+              className="absolute -bottom-6 -left-6 hidden rounded-2xl border border-border bg-white/95 p-3 shadow-card backdrop-blur md:block"
+            >
+              <GrassModel />
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              whileHover={{ y: -4 }}
+              className="absolute -top-4 -right-4 hidden rounded-2xl border border-border bg-white p-4 shadow-card md:block"
+            >
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ backgroundColor: `${BRAND}1a` }}>
                   <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
@@ -229,9 +289,8 @@ function Home() {
                   <div className="text-xs text-muted-foreground">11 verified reviews</div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
-
         </div>
       </section>
 
@@ -253,87 +312,130 @@ function Home() {
 
       {/* SERVICES */}
       <section id="services" className="mx-auto max-w-7xl px-6 py-24">
-        <div className="mx-auto max-w-2xl text-center">
+        <motion.div
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-80px" }}
+          variants={fadeUp}
+          className="mx-auto max-w-2xl text-center"
+        >
           <div className="text-xs font-bold uppercase tracking-widest" style={{ color: BRAND }}>What We Do</div>
           <h2 className="mt-3 text-4xl font-extrabold tracking-tight md:text-5xl">Full-service lawn care, done right.</h2>
           <p className="mt-4 text-muted-foreground">From a single mow to a full-season program, we keep your yard healthy and looking sharp.</p>
-        </div>
-        <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        </motion.div>
+        <motion.div
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-80px" }}
+          variants={stagger}
+          className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4"
+        >
           {services.map((s) => (
-            <div key={s.title} className="card-lift group flex flex-col rounded-2xl border border-border bg-card p-6 shadow-card">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ backgroundColor: `${BRAND}1a` }}>
-                <s.icon className="h-6 w-6" style={{ color: BRAND }} />
-              </div>
-              <h3 className="mt-5 text-lg font-bold">{s.title}</h3>
-              <p className="mt-2 flex-1 text-sm text-muted-foreground">{s.desc}</p>
-              <a href="#contact" className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold transition group-hover:gap-2.5" style={{ color: BRAND }}>
-                Get a Quote <ArrowRight className="h-4 w-4" />
-              </a>
-            </div>
+            <motion.div key={s.title} variants={fadeUp}>
+              <SpotlightCard className="card-lift group flex h-full flex-col rounded-2xl border border-border bg-card p-6 shadow-card">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ backgroundColor: `${BRAND}1a` }}>
+                  <s.icon className="h-6 w-6" style={{ color: BRAND }} />
+                </div>
+                <h3 className="mt-5 text-lg font-bold">{s.title}</h3>
+                <p className="mt-2 flex-1 text-sm text-muted-foreground">{s.desc}</p>
+                <a href="#contact" className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold transition group-hover:gap-2.5" style={{ color: BRAND }}>
+                  Get a Quote <ArrowRight className="h-4 w-4" />
+                </a>
+              </SpotlightCard>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </section>
 
       {/* ABOUT */}
-      <section id="about" className="bg-secondary/50">
+      <section id="about" ref={aboutRef} className="overflow-hidden bg-secondary/50">
         <div className="mx-auto grid max-w-7xl items-center gap-12 px-6 py-24 lg:grid-cols-2">
-          <div className="relative">
-            <div className="aspect-square overflow-hidden rounded-3xl" style={{ background: `linear-gradient(135deg, ${BRAND} 0%, #2a8a2c 100%)` }}>
-              <div className="flex h-full items-center justify-center">
-                <Leaf className="h-48 w-48 text-white/20" strokeWidth={1} />
-              </div>
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.7 }}
+            className="relative"
+          >
+            <div className="aspect-square overflow-hidden rounded-3xl">
+              <motion.img
+                src="/images/lawn-texture.jpg"
+                alt="Lush, freshly mowed green lawn"
+                style={{ y: parallaxY, scale: 1.15 }}
+                className="h-full w-full object-cover"
+              />
             </div>
-            <div className="absolute -right-4 -top-4 rounded-2xl bg-white p-5 shadow-lift">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="absolute -right-4 -top-4 rounded-2xl bg-white p-5 shadow-lift"
+            >
               <div className="text-4xl font-extrabold" style={{ color: BRAND }}>5.0★</div>
               <div className="text-xs font-medium text-muted-foreground">11 verified reviews</div>
-            </div>
-          </div>
-          <div>
-            <div className="text-xs font-bold uppercase tracking-widest" style={{ color: BRAND }}>About JBMG</div>
-            <h2 className="mt-3 text-4xl font-extrabold tracking-tight md:text-5xl">Quality work from people who care.</h2>
-            <p className="mt-6 text-lg text-muted-foreground">
+            </motion.div>
+          </motion.div>
+          <motion.div
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, margin: "-80px" }}
+            variants={stagger}
+          >
+            <motion.div variants={fadeUp} className="text-xs font-bold uppercase tracking-widest" style={{ color: BRAND }}>About JBMG</motion.div>
+            <motion.h2 variants={fadeUp} className="mt-3 text-4xl font-extrabold tracking-tight md:text-5xl">Quality work from people who care.</motion.h2>
+            <motion.p variants={fadeUp} className="mt-6 text-lg text-muted-foreground">
               JBMG Lawn Care is a locally owned and operated lawn service proudly serving Orem and the surrounding Utah County communities.
               We built JBMG on three things: showing up when we say we will, doing careful work, and using sustainable practices that are
               healthier for your family, your pets, and the environment.
-            </p>
-            <ul className="mt-8 grid gap-3 sm:grid-cols-2">
+            </motion.p>
+            <motion.ul variants={stagger} className="mt-8 grid gap-3 sm:grid-cols-2">
               {["Reliable scheduling", "Sustainable methods", "Sharp, even cuts", "Honest pricing"].map((p) => (
-                <li key={p} className="flex items-center gap-2 text-sm font-medium">
+                <motion.li key={p} variants={fadeUp} className="flex items-center gap-2 text-sm font-medium">
                   <CheckCircle2 className="h-5 w-5" style={{ color: BRAND }} /> {p}
-                </li>
+                </motion.li>
               ))}
-            </ul>
-          </div>
+            </motion.ul>
+          </motion.div>
         </div>
       </section>
 
-      {/* REVIEWS */}
-      <section id="reviews" className="mx-auto max-w-7xl px-6 py-24">
-        <div className="mx-auto max-w-2xl text-center">
+      {/* REVIEWS — marquee */}
+      <section id="reviews" className="py-24">
+        <motion.div
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-80px" }}
+          variants={fadeUp}
+          className="mx-auto max-w-2xl px-6 text-center"
+        >
           <div className="text-xs font-bold uppercase tracking-widest" style={{ color: BRAND }}>Reviews</div>
           <h2 className="mt-3 text-4xl font-extrabold tracking-tight md:text-5xl">5.0 stars on Google.</h2>
           <p className="mt-4 text-muted-foreground">A few words from Orem homeowners we work with.</p>
-        </div>
-        <div className="mt-14 grid gap-6 md:grid-cols-3">
-          {reviews.map((r) => (
-            <figure key={r.name} className="card-lift flex flex-col rounded-2xl border border-border bg-card p-7 shadow-card">
-              <div className="flex">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                ))}
-              </div>
-              <blockquote className="mt-4 flex-1 text-sm leading-relaxed text-foreground/90">"{r.text}"</blockquote>
-              <figcaption className="mt-6 flex items-center gap-3 border-t border-border pt-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold text-white" style={{ backgroundColor: INK }}>
-                  {r.name.split(" ").map((n) => n[0]).join("")}
+        </motion.div>
+
+        <div className="group relative mt-14 overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
+          <div className="flex w-max gap-6 animate-marquee group-hover:[animation-play-state:paused]">
+            {[...reviews, ...reviews].map((r, i) => (
+              <figure key={i} className="flex w-[340px] shrink-0 flex-col rounded-2xl border border-border bg-card p-7 shadow-card">
+                <div className="flex">
+                  {[...Array(5)].map((_, j) => (
+                    <Star key={j} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                  ))}
                 </div>
-                <div>
-                  <div className="text-sm font-semibold">{r.name}</div>
-                  <div className="text-xs text-muted-foreground">{r.meta} · Google</div>
-                </div>
-              </figcaption>
-            </figure>
-          ))}
+                <blockquote className="mt-4 flex-1 text-sm leading-relaxed text-foreground/90">"{r.text}"</blockquote>
+                <figcaption className="mt-6 flex items-center gap-3 border-t border-border pt-4">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold text-white" style={{ backgroundColor: INK }}>
+                    {r.name.split(" ").map((n) => n[0]).join("")}
+                  </div>
+                  <div>
+                    <div className="text-sm font-semibold">{r.name}</div>
+                    <div className="text-xs text-muted-foreground">{r.meta} · Google</div>
+                  </div>
+                </figcaption>
+              </figure>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -342,13 +444,24 @@ function Home() {
         <div className="mx-auto max-w-7xl px-6 py-20 text-center">
           <div className="text-xs font-bold uppercase tracking-widest" style={{ color: BRAND }}>Service Area</div>
           <h2 className="mt-3 text-3xl font-extrabold tracking-tight md:text-4xl">Proudly serving Orem, Utah and surrounding areas.</h2>
-          <div className="mt-10 flex flex-wrap justify-center gap-3">
+          <motion.div
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, margin: "-80px" }}
+            variants={stagger}
+            className="mt-10 flex flex-wrap justify-center gap-3"
+          >
             {areas.map((a) => (
-              <span key={a} className="inline-flex items-center gap-2 rounded-full border border-border bg-white px-5 py-2.5 text-sm font-semibold shadow-card">
+              <motion.span
+                key={a}
+                variants={fadeUp}
+                whileHover={{ scale: 1.06, y: -2 }}
+                className="inline-flex items-center gap-2 rounded-full border border-border bg-white px-5 py-2.5 text-sm font-semibold shadow-card"
+              >
                 <MapPin className="h-3.5 w-3.5" style={{ color: BRAND }} /> {a}
-              </span>
+              </motion.span>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -360,42 +473,57 @@ function Home() {
             <h2 className="mt-3 text-4xl font-extrabold tracking-tight md:text-5xl">Tell us about your lawn.</h2>
             <p className="mt-4 text-muted-foreground">Fill out the form and we'll get back to you with a no-pressure quote, usually within the same day.</p>
 
-            {sent ? (
-              <div className="mt-8 rounded-2xl border-2 p-8 text-center" style={{ borderColor: BRAND, backgroundColor: `${BRAND}10` }}>
-                <CheckCircle2 className="mx-auto h-12 w-12" style={{ color: BRAND }} />
-                <h3 className="mt-4 text-xl font-bold">Thanks — we got it.</h3>
-                <p className="mt-2 text-sm text-muted-foreground">We'll be in touch shortly. For anything urgent, give us a call at (801) 380-0475.</p>
-              </div>
-            ) : (
-              <form
-                onSubmit={(e) => { e.preventDefault(); setSent(true); }}
-                className="mt-8 grid gap-4 rounded-2xl border border-border bg-card p-6 shadow-card sm:grid-cols-2"
-              >
-                <Field label="Name" name="name" required />
-                <Field label="Phone" name="phone" type="tel" required />
-                <div className="sm:col-span-2"><Field label="Address" name="address" /></div>
-                <div className="sm:col-span-2">
-                  <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Service Needed</label>
-                  <select required className="mt-1.5 w-full rounded-lg border border-input bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
-                    <option value="">Select a service…</option>
-                    {services.map((s) => <option key={s.title}>{s.title}</option>)}
-                    <option>Multiple / Full-season program</option>
-                    <option>Something else</option>
-                  </select>
-                </div>
-                <div className="sm:col-span-2">
-                  <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Message</label>
-                  <textarea rows={4} className="mt-1.5 w-full resize-none rounded-lg border border-input bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20" placeholder="Lot size, gate access, any details…" />
-                </div>
-                <button
-                  type="submit"
-                  className="sm:col-span-2 inline-flex items-center justify-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-green-500/20 transition hover:opacity-90"
-                  style={{ backgroundColor: BRAND }}
+            <AnimatePresence mode="wait">
+              {sent ? (
+                <motion.div
+                  key="sent"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.4 }}
+                  className="mt-8 rounded-2xl border-2 p-8 text-center"
+                  style={{ borderColor: BRAND, backgroundColor: `${BRAND}10` }}
                 >
-                  Request My Free Quote <ArrowRight className="h-4 w-4" />
-                </button>
-              </form>
-            )}
+                  <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.1, type: "spring", stiffness: 200 }}>
+                    <CheckCircle2 className="mx-auto h-12 w-12" style={{ color: BRAND }} />
+                  </motion.div>
+                  <h3 className="mt-4 text-xl font-bold">Thanks — we got it.</h3>
+                  <p className="mt-2 text-sm text-muted-foreground">We'll be in touch shortly. For anything urgent, give us a call at (801) 380-0475.</p>
+                </motion.div>
+              ) : (
+                <motion.form
+                  key="form"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onSubmit={(e) => { e.preventDefault(); setSent(true); }}
+                  className="mt-8 grid gap-4 rounded-2xl border border-border bg-card p-6 shadow-card sm:grid-cols-2"
+                >
+                  <Field label="Name" name="name" required />
+                  <Field label="Phone" name="phone" type="tel" required />
+                  <div className="sm:col-span-2"><Field label="Address" name="address" /></div>
+                  <div className="sm:col-span-2">
+                    <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Service Needed</label>
+                    <select required className="mt-1.5 w-full rounded-lg border border-input bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+                      <option value="">Select a service…</option>
+                      {services.map((s) => <option key={s.title}>{s.title}</option>)}
+                      <option>Multiple / Full-season program</option>
+                      <option>Something else</option>
+                    </select>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Message</label>
+                    <textarea rows={4} className="mt-1.5 w-full resize-none rounded-lg border border-input bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20" placeholder="Lot size, gate access, any details…" />
+                  </div>
+                  <button
+                    type="submit"
+                    className="sm:col-span-2 inline-flex items-center justify-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-green-500/20 transition hover:opacity-90 hover:scale-[1.01]"
+                    style={{ backgroundColor: BRAND }}
+                  >
+                    Request My Free Quote <ArrowRight className="h-4 w-4" />
+                  </button>
+                </motion.form>
+              )}
+            </AnimatePresence>
           </div>
 
           {/* Sidebar */}
@@ -410,20 +538,37 @@ function Home() {
 
       {/* CTA BANNER */}
       <section className="px-6 pb-24">
-        <div className="mx-auto max-w-7xl overflow-hidden rounded-3xl px-8 py-16 text-center md:px-16 md:py-20" style={{ backgroundColor: INK }}>
-          <div className="mx-auto max-w-2xl">
-            <h2 className="text-4xl font-extrabold tracking-tight text-white md:text-5xl">
+        <div className="relative mx-auto max-w-7xl overflow-hidden rounded-3xl px-8 py-16 text-center md:px-16 md:py-20" style={{ backgroundColor: INK }}>
+          <img
+            src="/images/riding-mower.jpg"
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+          <div className="absolute inset-0" style={{ background: `linear-gradient(115deg, ${INK}f5 30%, ${INK}99 75%, ${INK}66 100%)` }} />
+          <motion.div
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, margin: "-80px" }}
+            variants={stagger}
+            className="relative mx-auto max-w-2xl"
+          >
+            <motion.div variants={fadeUp} className="mx-auto inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur">
+              <Sparkles className="h-3.5 w-3.5" style={{ color: BRAND }} /> Free, no-pressure quotes
+            </motion.div>
+            <motion.h2 variants={fadeUp} className="mt-5 text-4xl font-extrabold tracking-tight text-white md:text-5xl">
               Ready for a <span style={{ color: BRAND }}>Greener Lawn?</span>
-            </h2>
-            <p className="mt-4 text-white/70">Give us a call today — we'll have your yard looking sharp before you know it.</p>
-            <a
+            </motion.h2>
+            <motion.p variants={fadeUp} className="mt-4 text-white/70">Give us a call today — we'll have your yard looking sharp before you know it.</motion.p>
+            <motion.a
+              variants={fadeUp}
+              whileHover={{ scale: 1.05 }}
               href="tel:18013800475"
               className="mt-8 inline-flex items-center gap-2 rounded-full px-7 py-4 text-base font-semibold text-white shadow-lg transition hover:opacity-90"
               style={{ backgroundColor: BRAND }}
             >
               <Phone className="h-5 w-5" /> Call (801) 380-0475
-            </a>
-          </div>
+            </motion.a>
+          </motion.div>
         </div>
       </section>
 

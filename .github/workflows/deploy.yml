@@ -21,11 +21,14 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Set worker name
+      - name: Set worker name and keep domain access off
         run: |
           DATE=$(date -u +%Y-%m-%d)
           sed -i "s/\"compatibility_date\": \".*\"/\"compatibility_date\": \"$DATE\"/" .output/server/wrangler.json
           sed -i 's/"name": ".*"/"name": "jbmg-lawn-care"/' .output/server/wrangler.json
+          # Not yet authorized to go live by the client. Deploy the Worker but keep it
+          # unreachable — no workers.dev route, no preview URL — until client sign-off.
+          node -e "const f='.output/server/wrangler.json'; const c=JSON.parse(require('fs').readFileSync(f)); c.workers_dev=false; c.preview_urls=false; require('fs').writeFileSync(f, JSON.stringify(c, null, 2));"
 
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
